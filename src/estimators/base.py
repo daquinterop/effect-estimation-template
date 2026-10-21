@@ -11,6 +11,8 @@ class CausalEstimate:
     std_error: float
     p_value: float
     estimator_instance: Any  # Reference to the estimator that generated this
+    ci_lower: float
+    ci_upper: float
 
 class BaseEstimator(ABC):
     """
@@ -64,3 +66,15 @@ class BaseEstimator(ABC):
         This can be implemented by subclasses that support heterogeneous effects.
         """
         raise NotImplementedError("CATE estimation is not implemented for this estimator.")
+
+class DoseResponseMixin:
+    """
+    A class to implement dose-response methods
+    """
+    @abstractmethod
+    def dose_response_curve(self, t: float):
+        """
+        Returns the conditional expectation of the outcome given the treatment level t,
+        E[Y(t)]
+        """
+        pass

@@ -1,0 +1,20 @@
+[global]
+treatment_node = "t"
+outcome_node = "y"
+conditional_nodes = []
+random_seed = 43
+data_path = "data/"
+raw_data_file = "raw.csv"
+outputs_path = "outputs/"
+data_ranges = "config/data_ranges.json"
+
+[experiments.real]
+dag = "dag-real.json"
+adjustment_set = "BACKDOOR_MAX"
+estimators = ["OLS_SPLINE", "GPS", "SLearner"]
+
+[experiments.naive]
+dag = "dag-naive.json"
+adjustment_set = "BACKDOOR_MAX"
+estimators = ["OLS_SPLINE", "GPS", "SLearner"]
+
