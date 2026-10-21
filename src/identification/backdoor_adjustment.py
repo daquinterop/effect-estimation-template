@@ -1,6 +1,9 @@
+from dowhy.causal_identifier import adjustment_set
 import json
 import networkx as nx
 import warnings
+from pathlib import Path
+import logging
 warnings.filterwarnings("ignore")
 
 # Monkey patch for networkx d_separated, needed by some dowhy versions
@@ -10,9 +13,9 @@ if not hasattr(nx, 'd_separated'):
 
 from dowhy.causal_identifier import BackdoorAdjustment, AutoIdentifier, EstimandType
 
-def identify_adjustment_set(edges_list: str, treatment_name: str, outcome_name: str, 
-                            adjustment_set_type: str = "OPTIMAL_MINIMUM_ADJ",
-                            conditional_nodes: list = None):
+logger = logging.getLogger("causal_pipeline")
+
+def identify_adjustment_set(global_config, exp_config):
     """
     Reads a DAG from a JSON file and identifies the required adjustment set.
     
@@ -23,15 +26,18 @@ def identify_adjustment_set(edges_list: str, treatment_name: str, outcome_name: 
         adjustment_set_type (str): Type of adjustment set. 
             Options: 'MINIMAL', 'EFFICIENT', 'OPTIMAL_MINIMUM_ADJ', 'ALT_MINIMUM_ADJ'
         conditional_nodes (list): Nodes to condition on (e.g., heterogeneous effect modifiers).
-        
     Returns:
         list: The sorted list of nodes in the adjustment set.
     """
-    if conditional_nodes is None:
-        conditional_nodes = []
+    conditional_nodes = global_config.get("conditional_nodes")
+    treatment_name = global_config.get("treatment_node")
+    outcome_name = global_config.get("outcome_node")
+    adjustment_set_type = exp_config['adjustment_set']
+    dag_path = Path("config/") / f'{exp_config["dag"]}.json'
+    with open(dag_path, "rb") as f:
+        edges_list = json.load(f)
     causal_graph = nx.DiGraph(edges_list)
     observed_nodes = list(causal_graph.nodes())
-    
     try:
         bd_adj = getattr(BackdoorAdjustment, adjustment_set_type)
     except AttributeError:
@@ -63,6 +69,10 @@ def identify_adjustment_set(edges_list: str, treatment_name: str, outcome_name: 
                 sorted_s = sorted(s)
                 if sorted_s not in valid_sets:
                     valid_sets.append(sorted_s)
-        return valid_sets
     else:
-        return sorted(identified_estimand.get_backdoor_variables())
+        valid_sets = [sorted(identified_estimand.get_backdoor_variables())]
+    
+    if len(valid_sets[0]) == 0:
+        raise ValueError(f"No valid adjustment set found for experiment {exp_config['name']}")
+    else:
+        return valid_sets

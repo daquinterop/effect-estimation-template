@@ -9,12 +9,12 @@ outputs_path = "outputs/"
 data_ranges = "config/data_ranges.json"
 
 [experiments.real]
-dag = "dag-real.json"
-adjustment_set = "BACKDOOR_MAX"
-estimators = ["OLS_SPLINE", "GPS", "SLearner"]
+dag = "dag-real"
+adjustment_set = "BACKDOOR_EFFICIENT"
+estimators = ["LinearOLSPoly"]
 
 [experiments.naive]
-dag = "dag-naive.json"
-adjustment_set = "BACKDOOR_MAX"
+dag = "dag-naive"
+adjustment_set = "BACKDOOR_EFFICIENT"
 estimators = ["OLS_SPLINE", "GPS", "SLearner"]
 

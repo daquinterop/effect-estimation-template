@@ -42,6 +42,8 @@ class BaseData(ABC):
         self.treatment_col = global_config['treatment_node']
         self._data_ranges_file = global_config.get('data_ranges', None)
         self._processed_file = f"processed__{self.__class__.__name__}.csv"
+        self.data = None
+        self.treatment_range = None
 
         if cache:
             try:
@@ -58,6 +60,8 @@ class BaseData(ABC):
             self.data = self.data.dropna(how="any", axis=0)
             self.data.to_csv(Path(global_config['data_path']) / self._processed_file, index=True)
             logger.info(f"Data saved to {Path(global_config['data_path']) / self._processed_file}")
+        
+        self.treatment_range = (self.data[self.treatment_col].min(), self.data[self.treatment_col].max())
 
     def _transform_data(self) -> Any:
         """

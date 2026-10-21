@@ -1,6 +1,10 @@
+from dowhy.causal_identifier import adjustment_set
+from networkx.generators import spectral_graph_forge
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Optional
+
+from src.data.base import BaseData
 
 @dataclass
 class CausalEstimate:
@@ -10,7 +14,6 @@ class CausalEstimate:
     value: float
     std_error: float
     p_value: float
-    estimator_instance: Any  # Reference to the estimator that generated this
     ci_lower: float
     ci_upper: float
 
@@ -21,16 +24,8 @@ class BaseEstimator(ABC):
     Instantiated directly with data (statsmodels style) to tightly couple
     the estimator instance to the dataset it operates on.
     """
-    
-    def __init__(
-        self, 
-        outcome: Any, 
-        treatment: Any, 
-        controls: Any, 
-        conditional_nodes: Optional[Any] = None, 
-        splits: Optional[Any] = None, 
-        **kwargs
-    ):
+    description: str | None = None
+    def __init__(self, global_config: dict, exp_config: dict, controls: list[str], **kwargs):
         """
         Initialize the estimator with data.
         
@@ -39,16 +34,24 @@ class BaseEstimator(ABC):
             treatment: The treatment variable.
             controls: The control/confounder variables.
             conditional_nodes: Effect modifiers (W) used for CATE estimation.
-            splits: Indices for cross-fitting (if applicable).
             **kwargs: Additional estimator-specific arguments.
         """
-        self.outcome = outcome
-        self.treatment = treatment
+        self.treatment = global_config.get("treatment_node")
+        self.outcome = global_config.get("outcome_node")
         self.controls = controls
-        self.conditional_nodes = conditional_nodes
-        self.splits = splits
+        self.conditional_nodes = global_config.get("conditional_nodes", [])
         self.kwargs = kwargs
+        self.estimator = None
+        self.data: BaseData = None
+        self.treatment_features = None
     
+    @abstractmethod
+    def fit(self, data: BaseData, **kwargs) -> None:
+        """
+        Fit the estimator to the data.
+        """
+        pass
+
     @abstractmethod
     def estimate_ate(self) -> CausalEstimate:
         """
@@ -72,7 +75,7 @@ class DoseResponseMixin:
     A class to implement dose-response methods
     """
     @abstractmethod
-    def dose_response_curve(self, t: float):
+    def dose_response_curve(self, t: float) -> CausalEstimate:
         """
         Returns the conditional expectation of the outcome given the treatment level t,
         E[Y(t)]
