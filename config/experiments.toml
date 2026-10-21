@@ -11,7 +11,8 @@ data_ranges = "config/data_ranges.json"
 [experiments.real]
 dag = "dag-real"
 adjustment_set = "BACKDOOR_EFFICIENT"
-estimators = ["LinearOLSPoly"]
+estimators = ["LinearOLSPoly", "GPS", "SLearner"]
+#estimators = ["LinearOLSPoly"]
 
 [experiments.naive]
 dag = "dag-naive"

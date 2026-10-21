@@ -105,17 +105,18 @@ def run_estimate(global_config, exp_config, data: BaseData, adjustment_sets):
             estimator.fit(data)
             # Estimate dose-response curve
             t_grid = np.linspace(*data.treatment_range, num=100)
-            dose_response_df = pd.DataFrame(
-                index=t_grid, 
-                columns=["estimate", "std_error", "p_value", "ci_lower", "ci_upper"]
-            )
-            for t in t_grid:
-                estimate = estimator.dose_response_curve(t)
-                dose_response_df.loc[t, "estimate"] = estimate.value
-                dose_response_df.loc[t, "std_error"] = estimate.std_error
-                dose_response_df.loc[t, "p_value"] = estimate.p_value
-                dose_response_df.loc[t, "ci_lower"] = estimate.ci_lower
-                dose_response_df.loc[t, "ci_upper"] = estimate.ci_upper
+            dose_response_df = estimator.dose_response_curve(t_grid)
+            # dose_response_df = pd.DataFrame(
+            #     index=t_grid, 
+            #     columns=["estimate", "std_error", "p_value", "ci_lower", "ci_upper"]
+            # )
+            # for t in t_grid:
+            #     estimate = estimator.dose_response_curve(t)
+                # dose_response_df.loc[t, "estimate"] = estimate.value
+                # dose_response_df.loc[t, "std_error"] = estimate.std_error
+                # dose_response_df.loc[t, "p_value"] = estimate.p_value
+                # dose_response_df.loc[t, "ci_lower"] = estimate.ci_lower
+                # dose_response_df.loc[t, "ci_upper"] = estimate.ci_upper
             
             file_name = f"{estimator_name}_average_dose_response.csv"
             save_dir = Path(global_config["outputs_path"]) / exp_config["name"] / "estimates"
@@ -141,3 +142,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    logger.info("Finished pipeline.")

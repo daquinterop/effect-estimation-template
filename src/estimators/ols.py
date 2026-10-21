@@ -40,26 +40,30 @@ class LinearOLS(BaseEstimator, DoseResponseMixin):
         return exog
 
     def estimate_ate(self) -> CausalEstimate:
-        pass
+        raise NotImplementedError
     
     def estimate_cate(self) -> CausalEstimate:
         raise NotImplementedError
     
-    def dose_response_curve(self, t: float) -> CausalEstimate:
+    def dose_response_curve(self, t_grid: list[float]) -> pd.DataFrame:
         """
         Calculates the dose response curve at a given value of t. This is the conditional expectation 
         of the outcome given the treatment level t, E[Y(t)].
         """
-        exog = self._get_exog(pd.Series([t] * len(self.data), index=self.data.index))
-        prediction = self.estimator.get_prediction(exog.mean().to_frame().T)
-        estimate = CausalEstimate(
-            value=prediction.predicted, 
-            std_error=prediction.se, 
-            p_value=2*min(stats.norm.cdf(0, prediction.predicted, prediction.se), stats.norm.sf(0, prediction.predicted, prediction.se)), 
-            ci_lower=prediction.predicted - 1.96*prediction.se, 
-            ci_upper=prediction.predicted + 1.96*prediction.se,
+        response_df = pd.DataFrame(
+            columns=["estimate", "std_error", "p_value", "ci_lower", "ci_upper"], 
+            index=t_grid
         )
-        return estimate
+        for t in t_grid:
+            exog = self._get_exog(pd.Series([t] * len(self.data), index=self.data.index))
+            prediction = self.estimator.get_prediction(exog.mean().to_frame().T)
+            response_df.loc[t] = (
+                prediction.predicted.item(), prediction.se.item(), 
+                2*min(stats.norm.cdf(0, prediction.predicted.item(), prediction.se.item()), stats.norm.sf(0, prediction.predicted.item(), prediction.se.item())),
+                prediction.predicted.item() - 1.96*prediction.se.item(),
+                prediction.predicted.item() + 1.96*prediction.se.item()
+            )
+        return response_df
 
 
 class LinearOLSPoly(LinearOLS):
