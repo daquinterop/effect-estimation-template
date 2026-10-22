@@ -8,7 +8,7 @@ As an example, the template includes a synthetic dataset generated with crop mod
 
 The framework is organized into modular components:
 
-- **Data Engineering (`src.data.base.BaseData`)**: Handles data loading, transformation, missing value imputation, and caching. Subclasses implement `_load_data()`, `_transform_data()`, and `_impute_missing()`.
+- **Data processing (`src.data.base.BaseData`)**: Handles data loading, transformation, missing value imputation, and cross-fitting splits. All characteristics and transformation of the data should be handled in the Data classes.
 - **Causal Identification (`src.identification.backdoor_adjustment`)**: Reads DAG specifications (`config/<dag>.json`) and uses the DoWhy backdoor criterion to identify valid adjustment sets.
 - **Statistical Estimators (`src.estimators.base.BaseEstimator`)**: Defines a standardized interface for causal estimators. The causal estimands of interest (e.g. ATE, ATT, CATE, Dose-Response, etc.) are defined as methods of the estimators. This repository implements an example of fertilizer-dose-response estimation (Quadratic OLS, Generalized Propensity Score, and Random Forest S-Learner) evaluated against known ground-truth responses.
 - **Robustness & Diagnostics (`src.robustness.base.BaseRobustnessCheck`)**: Evaluates refutation tests and sensitivity checks using `CausalEstimate` outputs. It has not been implemented yet. 
