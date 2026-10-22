@@ -4,6 +4,8 @@ This repository provides a modular boilerplate for estimating causal effects und
 
 As an example, the template includes a synthetic dataset generated with crop models where the true dose-response relationship is known, allowing you to benchmark and compare estimator performance against ground truth under different causal DAG assumptions.
 
+This template does not add many value if one is interested in classic causal estimands like ATE or ATT. In those cases, the features implemented in libraries like [dowhy](https://www.pywhy.org/dowhy/v0.14/) or [EconML](https://www.pywhy.org/EconML/) should be enough. This template was introduced for the estimation of other causal estimands such as dose-response functions, marginal effects, incremental effects, etc. 
+
 ## Architecture
 
 The framework is organized into modular components:
