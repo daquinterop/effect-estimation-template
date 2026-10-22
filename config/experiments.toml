@@ -1,6 +1,6 @@
 [global]
-treatment_node = "t"
-outcome_node = "y"
+treatment_node = "n_rate_pred"
+outcome_node = "obs_yield"
 conditional_nodes = []
 random_seed = 43
 data_path = "data/"
@@ -12,10 +12,10 @@ data_ranges = "config/data_ranges.json"
 dag = "dag-real"
 adjustment_set = "BACKDOOR_EFFICIENT"
 estimators = ["LinearOLSPoly", "GPS", "SLearner"]
-#estimators = ["LinearOLSPoly"]
+#estimators = ["LinearOLSPoly", "GPS"]
 
 [experiments.naive]
 dag = "dag-naive"
 adjustment_set = "BACKDOOR_EFFICIENT"
-estimators = ["OLS_SPLINE", "GPS", "SLearner"]
-
+estimators = ["LinearOLSPoly", "GPS", "SLearner"]
+#estimators = ["LinearOLSPoly", "GPS"]

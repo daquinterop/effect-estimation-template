@@ -1,33 +1,44 @@
-from dowhy.causal_identifier import adjustment_set
 import json
-import networkx as nx
-import warnings
-from pathlib import Path
 import logging
-warnings.filterwarnings("ignore")
+from pathlib import Path
+
+from dowhy.causal_identifier import AutoIdentifier, BackdoorAdjustment, EstimandType
+import networkx as nx
 
 # Monkey patch for networkx d_separated, needed by some dowhy versions
 nx.algorithms.d_separated = nx.algorithms.d_separation.is_d_separator
-if not hasattr(nx, 'd_separated'):
+if not hasattr(nx, "d_separated"):
     nx.d_separated = nx.algorithms.d_separation.is_d_separator
-
-from dowhy.causal_identifier import BackdoorAdjustment, AutoIdentifier, EstimandType
 
 logger = logging.getLogger("causal_pipeline")
 
-def identify_adjustment_set(global_config, exp_config):
+
+def identify_adjustment_set(
+    global_config: dict, exp_config: dict
+) -> list[list[str]]:
     """
-    Reads a DAG from a JSON file and identifies the required adjustment set.
-    
-    Args:
-        dag_path (str): Path to the JSON file containing the DAG edges (list of [source, target]).
-        treatment_name (str): Name of the treatment node.
-        outcome_name (str): Name of the outcome node.
-        adjustment_set_type (str): Type of adjustment set. 
-            Options: 'MINIMAL', 'EFFICIENT', 'OPTIMAL_MINIMUM_ADJ', 'ALT_MINIMUM_ADJ'
-        conditional_nodes (list): Nodes to condition on (e.g., heterogeneous effect modifiers).
-    Returns:
-        list: The sorted list of nodes in the adjustment set.
+    Read a DAG specification from a JSON file and identify valid adjustment sets.
+
+    Parameters
+    ----------
+    global_config : dict
+        Global configuration dictionary containing keys such as 'treatment_node',
+        'outcome_node', and 'conditional_nodes'.
+    exp_config : dict
+        Experiment configuration dictionary containing keys such as 'dag'
+        (name of the DAG file without extension) and 'adjustment_set'
+        (type of backdoor adjustment, e.g., 'BACKDOOR_EFFICIENT').
+
+    Returns
+    -------
+    list of list of str
+        A list of identified adjustment sets, where each set is a sorted list
+        of node names.
+
+    Raises
+    ------
+    ValueError
+        If `adjustment_set` type is invalid or if no valid adjustment set is found.
     """
     conditional_nodes = global_config.get("conditional_nodes")
     treatment_name = global_config.get("treatment_node")

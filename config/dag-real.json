@@ -1,10 +1,13 @@
 [
-    ["x1", "y"],  
-    ["x2", "y"],
-    ["x4", "y"],
-    ["x5", "y"],
-    ["x1", "t"],
-    ["x3", "t"],
-    ["x5", "t"],
-    ["t", "y"]
+    ["socioeconomic", "splitting"],  
+    ["socioeconomic", "n_rate_pred"],
+    ["access", "n_rate_pred"],
+    ["access", "fertilizer_type"],
+    ["soil", "n_rate_pred"],
+    ["soil", "splitting"],
+    ["soil", "obs_yield"],
+    ["weather", "obs_yield"],
+    ["splitting", "obs_yield"],
+    ["n_rate_pred", "obs_yield"],
+    ["fertilizer_type", "obs_yield"]
 ]
